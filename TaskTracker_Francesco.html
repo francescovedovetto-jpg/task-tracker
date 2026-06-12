@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task Tracker — Francesco</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f0f4f8; color: #222; padding: 16px; font-size: 14px; }
+  h1 { font-size: 1.25rem; color: #3D5AA0; margin-bottom: 2px; }
+  .subtitle { font-size: 0.78rem; color: #999; margin-bottom: 14px; }
+  .sync-bar { display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:0.75rem; color:#999; }
+  .sync-dot { width:8px; height:8px; border-radius:50%; background:#ccc; flex-shrink:0; }
+  .sync-dot.ok { background:#38a169; }
+  .sync-dot.loading { background:#dd6b20; animation: pulse 1s infinite; }
+  .sync-dot.error { background:#e53e3e; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .summary { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .sbox { background: white; border-radius: 8px; padding: 8px 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.07); min-width: 70px; }
+  .sbox .num { font-size: 1.4rem; font-weight: 700; color: #3D5AA0; }
+  .sbox .lbl { font-size: 0.68rem; color: #999; text-transform: uppercase; }
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .fbtn { padding: 5px 12px; border-radius: 20px; border: 1.5px solid #3D5AA0; background: white; color: #3D5AA0; font-size: 0.75rem; cursor: pointer; transition: all 0.15s; }
+  .fbtn.active { background: #3D5AA0; color: white; }
+  .add-form { background: white; border-radius: 10px; padding: 14px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-left: 4px solid #3D5AA0; }
+  .add-form h3 { font-size: 0.85rem; color: #3D5AA0; margin-bottom: 10px; }
+  .form-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .form-row input, .form-row select, .form-row textarea { border: 1px solid #ddd; border-radius: 6px; padding: 6px 10px; font-size: 0.8rem; font-family: Arial, sans-serif; background: #fafafa; color: #222; }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus { outline: none; border-color: #3D5AA0; background: white; }
+  .f-title { flex: 2; min-width: 180px; }
+  .f-scadenza { flex: 1; min-width: 120px; }
+  .f-priority { flex: 1; min-width: 110px; }
+  .f-area { flex: 1; min-width: 100px; }
+  .f-note { width: 100%; resize: vertical; min-height: 48px; }
+  .btn-add { background: #3D5AA0; color: white; border: none; border-radius: 6px; padding: 7px 18px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+  .btn-add:hover { background: #2d4480; }
+  .toggle-form { background: none; border: 1.5px dashed #3D5AA0; border-radius: 8px; color: #3D5AA0; padding: 8px 16px; font-size: 0.8rem; cursor: pointer; width: 100%; margin-bottom: 14px; }
+  .toggle-form:hover { background: #ebf0fb; }
+  .task-list { display: flex; flex-direction: column; gap: 8px; }
+  .task-card { background: white; border-radius: 10px; padding: 12px 14px; display: flex; align-items: flex-start; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-left: 4px solid #ccc; }
+  .task-card.urgente { border-left-color: #e53e3e; }
+  .task-card.oggi    { border-left-color: #dd6b20; }
+  .task-card.settimana { border-left-color: #3D5AA0; }
+  .task-card.mese    { border-left-color: #38a169; }
+  .task-card.personale { border-left-color: #805ad5; }
+  .task-card.done-card { opacity: 0.4; }
+  .task-card.done-card .task-title { text-decoration: line-through; color: #aaa; }
+  .checkbox { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ccc; cursor: pointer; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
+  .checkbox.checked { background: #3D5AA0; border-color: #3D5AA0; color: white; }
+  .task-body { flex: 1; }
+  .task-title { font-size: 0.88rem; font-weight: 600; color: #222; margin-bottom: 4px; }
+  .task-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .tag { font-size: 0.66rem; padding: 2px 7px; border-radius: 10px; font-weight: 700; text-transform: uppercase; }
+  .tag-urgente   { background: #fed7d7; color: #c53030; }
+  .tag-oggi      { background: #feebc8; color: #c05621; }
+  .tag-settimana { background: #ebf4ff; color: #2b6cb0; }
+  .tag-mese      { background: #c6f6d5; color: #276749; }
+  .tag-personale { background: #e9d8fd; color: #553c9a; }
+  .tag-make      { background: #e2e8f0; color: #4a5568; }
+  .tag-4take     { background: #fef3c7; color: #92400e; }
+  .tag-privato   { background: #fce4ec; color: #880e4f; }
+  .date-lbl { font-size: 0.72rem; color: #aaa; margin-left: auto; white-space: nowrap; }
+  .task-note { font-size: 0.76rem; color: #666; margin-top: 4px; line-height: 1.4; }
+  .del-btn { background: none; border: none; color: #ddd; font-size: 1rem; cursor: pointer; flex-shrink: 0; padding: 0 2px; }
+  .del-btn:hover { color: #e53e3e; }
+  .empty { text-align: center; color: #bbb; padding: 30px; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+
+<h1>📋 Task Tracker — Francesco</h1>
+<p class="subtitle" id="date-display"></p>
+
+<div class="sync-bar">
+  <div class="sync-dot loading" id="sync-dot"></div>
+  <span id="sync-label">Connessione in corso...</span>
+</div>
+
+<div class="summary">
+  <div class="sbox"><div class="num" id="cnt-total">0</div><div class="lbl">Totale</div></div>
+  <div class="sbox"><div class="num" id="cnt-open">0</div><div class="lbl">Aperti</div></div>
+  <div class="sbox"><div class="num" id="cnt-done">0</div><div class="lbl">Fatti</div></div>
+  <div class="sbox"><div class="num" id="cnt-urgente" style="color:#e53e3e">0</div><div class="lbl">Urgenti</div></div>
+</div>
+
+<div class="filters">
+  <button class="fbtn active" onclick="setFilter('tutti',this)">Tutti</button>
+  <button class="fbtn" onclick="setFilter('urgente',this)">🔴 Urgenti</button>
+  <button class="fbtn" onclick="setFilter('oggi',this)">🟠 Oggi</button>
+  <button class="fbtn" onclick="setFilter('settimana',this)">🔵 Settimana</button>
+  <button class="fbtn" onclick="setFilter('mese',this)">🟢 Mese</button>
+  <button class="fbtn" onclick="setFilter('personale',this)">🟣 In attesa</button>
+  <button class="fbtn" onclick="setFilter('make',this)">Make</button>
+  <button class="fbtn" onclick="setFilter('4take',this)">4Take</button>
+  <button class="fbtn" onclick="setFilter('privato',this)">Privato</button>
+</div>
+
+<button class="toggle-form" id="toggle-btn" onclick="toggleForm()">➕ Aggiungi nuovo task</button>
+
+<div class="add-form" id="add-form" style="display:none">
+  <h3>Nuovo task</h3>
+  <div class="form-row">
+    <input class="f-title" id="f-title" type="text" placeholder="Titolo task *">
+    <input class="f-scadenza" id="f-scadenza" type="text" placeholder="Scadenza (es. Oggi, 20 giugno…)">
+  </div>
+  <div class="form-row">
+    <select class="f-priority" id="f-priority">
+      <option value="urgente">🔴 Urgente</option>
+      <option value="oggi">🟠 Oggi</option>
+      <option value="settimana" selected>🔵 Questa settimana</option>
+      <option value="mese">🟢 Entro il mese</option>
+      <option value="personale">🟣 In attesa</option>
+    </select>
+    <select class="f-area" id="f-area">
+      <option value="make">Make</option>
+      <option value="4take">4Take</option>
+      <option value="privato">Privato</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <textarea class="f-note" id="f-note" placeholder="Note (opzionale)"></textarea>
+  </div>
+  <div class="form-row">
+    <button class="btn-add" onclick="addTask()">Aggiungi task</button>
+  </div>
+</div>
+
+<div class="task-list" id="task-list"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────
+const JSONBIN_API_KEY = '$2a$10$1UEV6gPLoRcJBr98CfUcq.yahi3jXsLE793md6CVrL5NAVZDbaMRW';
+const JSONBIN_BIN_ID  = '6a2bff73f5f4af5e29e63c4e';
+// ────────────────────────────────────────────────────
+
+const DEFAULT_TASKS = [
+  {id:1,  title:"Report 4Take — Settimana 24", note:"Inviare entro oggi. Condividere 2 documenti Excel con Nicola, definire prime obiettive.", scadenza:"Oggi", priority:"urgente", tags:["urgente","4take"], done:false},
+  {id:2,  title:"Riunione Keller con Piero", note:"Oggi dalle 14:00 alle 15:00. Integrazione ore per completare attività delle aziende.", scadenza:"Oggi 14:00-15:00", priority:"oggi", tags:["oggi","make"], done:false},
+  {id:3,  title:"Mail BLM — Presentazione test + link", note:"BLM ha acquistato pacchetto 4 test + consulenza. Preparare mail con link per effettuare il test.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","make"], done:false},
+  {id:4,  title:"Video promo Red Carpet", note:"Breve video promozionale per il gruppo musicale. Priorità alta.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","privato"], done:false},
+  {id:5,  title:"Verifica tessera ACI", note:"Verificare se la tessera è attiva e da quando.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","privato"], done:false},
+  {id:6,  title:"Verifica GSE per detrazione", note:"Pratica personale per detrazione fiscale.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","privato"], done:false},
+  {id:7,  title:"Verifica ultime PEC", note:"Verificare se le ultime PEC sono state prese al commercialista.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","make"], done:false},
+  {id:8,  title:"Sunto per assistenza iCareFone Transfer", note:"Riepilogo problema (migrazione WhatsApp Pixel→iPhone, backup sparito) da inviare all'assistenza.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","privato"], done:false},
+  {id:9,  title:"Corso Raffaele Gaito", note:"Pianificare le sessioni di studio per seguire il corso acquistato.", scadenza:"Prossime settimane", priority:"mese", tags:["mese","make"], done:false},
+  {id:10, title:"Proposta Summer Day Make Group", note:"Proporre attività di team building o simili per la giornata di fine luglio.", scadenza:"Fine luglio", priority:"mese", tags:["mese","make"], done:false},
+  {id:11, title:"Lettura libro (sera)", note:"Leggere il libro la sera. Obiettivo: finirlo entro 1 mese.", scadenza:"Entro 1 mese", priority:"mese", tags:["mese","privato"], done:false},
+  {id:12, title:"Esami del sangue — Risposta CeLab", note:"In attesa di risposta dal Centro CeLab a cui hai mandato la richiesta.", scadenza:"In attesa", priority:"personale", tags:["personale","privato"], done:false},
+  {id:13, title:"Mail a Marc (Make Finance) — Padova Investimenti / Patent Box", note:"Girare a Marc la relazione del consulente della software house per valutare l'applicabilità del Patent Box.", scadenza:"Lunedì 16 giugno", priority:"settimana", tags:["settimana","make"], done:false},
+  {id:14, title:"Invia documenti a ETRA — aumento componenti abitativi", note:"Girare i documenti richiesti a info@etraspa.it.", scadenza:"Sabato 14 giugno", priority:"settimana", tags:["settimana","privato"], done:false},
+  {id:15, title:"Fissa incontro con maestro Luca — tema Elia", note:"Contattare il maestro Luca per organizzare un incontro sul tema di Elia.", scadenza:"Entro venerdì 19 giugno", priority:"mese", tags:["mese","privato"], done:false},
+];
+
+let tasks = [];
+let nextId = 16;
+let currentFilter = 'tutti';
+let formOpen = false;
+let saveTimer = null;
+
+function setSyncStatus(status, msg) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'sync-dot ' + status;
+  lbl.textContent = msg;
+}
+
+async function loadFromCloud() {
+  setSyncStatus('loading', 'Caricamento dati...');
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': JSONBIN_API_KEY }
+    });
+    if (!res.ok) throw new Error('Fetch failed');
+    const data = await res.json();
+    tasks = data.record.tasks || DEFAULT_TASKS.map(t=>({...t}));
+    nextId = data.record.nextId || 16;
+    setSyncStatus('ok', 'Sincronizzato ' + new Date().toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'}));
+  } catch(e) {
+    tasks = DEFAULT_TASKS.map(t=>({...t}));
+    setSyncStatus('error', 'Offline — modifiche non sincronizzate');
+  }
+  render();
+}
+
+async function saveToCloud() {
+  setSyncStatus('loading', 'Salvataggio...');
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
+      body: JSON.stringify({ tasks, nextId })
+    });
+    if (!res.ok) throw new Error('Save failed');
+    setSyncStatus('ok', 'Salvato ' + new Date().toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'}));
+  } catch(e) {
+    setSyncStatus('error', 'Errore salvataggio — riprova');
+  }
+}
+
+function debounceSave() {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveToCloud, 800);
+}
+
+function toggleForm() {
+  formOpen = !formOpen;
+  document.getElementById('add-form').style.display = formOpen ? 'block' : 'none';
+  document.getElementById('toggle-btn').textContent = formOpen ? '✕ Chiudi' : '➕ Aggiungi nuovo task';
+}
+
+function addTask() {
+  const title = document.getElementById('f-title').value.trim();
+  if (!title) { document.getElementById('f-title').style.borderColor='#e53e3e'; return; }
+  document.getElementById('f-title').style.borderColor='#ddd';
+  const priority = document.getElementById('f-priority').value;
+  const area = document.getElementById('f-area').value;
+  const scadenza = document.getElementById('f-scadenza').value.trim() || '—';
+  const note = document.getElementById('f-note').value.trim();
+  tasks.push({id:nextId++, title, note, scadenza, priority, tags:[priority, area], done:false});
+  document.getElementById('f-title').value='';
+  document.getElementById('f-scadenza').value='';
+  document.getElementById('f-note').value='';
+  toggleForm();
+  render();
+  debounceSave();
+}
+
+function toggleDone(id) {
+  const t = tasks.find(t=>t.id===id);
+  if(t){ t.done=!t.done; render(); debounceSave(); }
+}
+
+function deleteTask(id) {
+  if(!confirm('Eliminare questo task?')) return;
+  tasks = tasks.filter(t=>t.id!==id);
+  render(); debounceSave();
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+const PRIORITY_ORDER = ['urgente','oggi','settimana','mese','personale'];
+const TAG_LABELS = {
+  urgente:'🔴 Urgente', oggi:'🟠 Oggi', settimana:'🔵 Settimana',
+  mese:'🟢 Mese', personale:'🟣 In attesa',
+  make:'Make', '4take':'4Take', privato:'Privato'
+};
+
+function render() {
+  let filtered = currentFilter==='tutti' ? tasks
+    : tasks.filter(t=>t.priority===currentFilter || t.tags.includes(currentFilter));
+  filtered = [...filtered].sort((a,b)=>{
+    if(a.done!==b.done) return a.done?1:-1;
+    return PRIORITY_ORDER.indexOf(a.priority)-PRIORITY_ORDER.indexOf(b.priority);
+  });
+  document.getElementById('cnt-total').textContent = tasks.length;
+  document.getElementById('cnt-open').textContent = tasks.filter(t=>!t.done).length;
+  document.getElementById('cnt-done').textContent = tasks.filter(t=>t.done).length;
+  document.getElementById('cnt-urgente').textContent = tasks.filter(t=>!t.done&&(t.priority==='urgente'||t.priority==='oggi')).length;
+  const list = document.getElementById('task-list');
+  if(!filtered.length){ list.innerHTML='<div class="empty">Nessun task in questa categoria.</div>'; return; }
+  list.innerHTML = filtered.map(t=>`
+    <div class="task-card ${t.priority} ${t.done?'done-card':''}">
+      <div class="checkbox ${t.done?'checked':''}" onclick="toggleDone(${t.id})">${t.done?'✓':''}</div>
+      <div class="task-body">
+        <div class="task-title">${t.title}</div>
+        <div class="task-meta">
+          ${t.tags.map(tag=>`<span class="tag tag-${tag}">${TAG_LABELS[tag]||tag}</span>`).join('')}
+          <span class="date-lbl">📅 ${t.scadenza}</span>
+        </div>
+        ${t.note?`<div class="task-note">${t.note}</div>`:''}
+      </div>
+      <button class="del-btn" onclick="deleteTask(${t.id})" title="Elimina">✕</button>
+    </div>`).join('');
+}
+
+const now = new Date();
+document.getElementById('date-display').textContent =
+  now.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+loadFromCloud();
+</script>
+</body>
+</html>
