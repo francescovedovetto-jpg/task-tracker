@@ -22,6 +22,8 @@
   .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
   .fbtn { padding: 5px 12px; border-radius: 20px; border: 1.5px solid #3D5AA0; background: white; color: #3D5AA0; font-size: 0.75rem; cursor: pointer; transition: all 0.15s; }
   .fbtn.active { background: #3D5AA0; color: white; }
+
+  /* ADD FORM */
   .add-form { background: white; border-radius: 10px; padding: 14px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-left: 4px solid #3D5AA0; }
   .add-form h3 { font-size: 0.85rem; color: #3D5AA0; margin-bottom: 10px; }
   .form-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
@@ -36,8 +38,11 @@
   .btn-add:hover { background: #2d4480; }
   .toggle-form { background: none; border: 1.5px dashed #3D5AA0; border-radius: 8px; color: #3D5AA0; padding: 8px 16px; font-size: 0.8rem; cursor: pointer; width: 100%; margin-bottom: 14px; }
   .toggle-form:hover { background: #ebf0fb; }
+
+  /* TASK CARDS */
   .task-list { display: flex; flex-direction: column; gap: 8px; }
-  .task-card { background: white; border-radius: 10px; padding: 12px 14px; display: flex; align-items: flex-start; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-left: 4px solid #ccc; }
+  .task-card { background: white; border-radius: 10px; padding: 12px 14px; display: flex; align-items: flex-start; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-left: 4px solid #ccc; transition: box-shadow 0.15s; }
+  .task-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.10); }
   .task-card.urgente { border-left-color: #e53e3e; }
   .task-card.oggi    { border-left-color: #dd6b20; }
   .task-card.settimana { border-left-color: #3D5AA0; }
@@ -47,9 +52,9 @@
   .task-card.done-card .task-title { text-decoration: line-through; color: #aaa; }
   .checkbox { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ccc; cursor: pointer; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
   .checkbox.checked { background: #3D5AA0; border-color: #3D5AA0; color: white; }
-  .task-body { flex: 1; }
+  .task-body { flex: 1; min-width: 0; }
   .task-title { font-size: 0.88rem; font-weight: 600; color: #222; margin-bottom: 4px; }
-  .task-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .task-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 6px; }
   .tag { font-size: 0.66rem; padding: 2px 7px; border-radius: 10px; font-weight: 700; text-transform: uppercase; }
   .tag-urgente   { background: #fed7d7; color: #c53030; }
   .tag-oggi      { background: #feebc8; color: #c05621; }
@@ -60,10 +65,28 @@
   .tag-4take     { background: #fef3c7; color: #92400e; }
   .tag-privato   { background: #fce4ec; color: #880e4f; }
   .date-lbl { font-size: 0.72rem; color: #aaa; margin-left: auto; white-space: nowrap; }
-  .task-note { font-size: 0.76rem; color: #666; margin-top: 4px; line-height: 1.4; }
   .del-btn { background: none; border: none; color: #ddd; font-size: 1rem; cursor: pointer; flex-shrink: 0; padding: 0 2px; }
   .del-btn:hover { color: #e53e3e; }
   .empty { text-align: center; color: #bbb; padding: 30px; font-size: 0.85rem; }
+
+  /* NOTE SECTION */
+  .note-section { margin-top: 6px; }
+  .note-toggle { background: none; border: none; font-size: 0.73rem; color: #3D5AA0; cursor: pointer; padding: 0; text-decoration: underline; }
+  .note-panel { margin-top: 8px; display: none; }
+  .note-panel.open { display: block; }
+  .note-textarea { width: 100%; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px; font-size: 0.78rem; font-family: Arial, sans-serif; color: #333; background: #f8fafc; resize: vertical; min-height: 70px; line-height: 1.5; }
+  .note-textarea:focus { outline: none; border-color: #3D5AA0; background: white; }
+  .note-actions { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+  .btn-save-note { background: #3D5AA0; color: white; border: none; border-radius: 5px; padding: 5px 12px; font-size: 0.75rem; cursor: pointer; font-weight: 600; }
+  .btn-save-note:hover { background: #2d4480; }
+  .note-saved { font-size: 0.7rem; color: #38a169; display: none; }
+
+  /* LOG */
+  .log-section { margin-top: 8px; border-top: 1px solid #f0f0f0; padding-top: 8px; }
+  .log-title { font-size: 0.7rem; color: #aaa; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
+  .log-entry { font-size: 0.72rem; color: #888; padding: 3px 0; border-bottom: 1px dashed #f0f0f0; line-height: 1.4; }
+  .log-entry:last-child { border-bottom: none; }
+  .log-date { color: #bbb; font-size: 0.68rem; }
 </style>
 </head>
 <body>
@@ -118,7 +141,7 @@
     </select>
   </div>
   <div class="form-row">
-    <textarea class="f-note" id="f-note" placeholder="Note (opzionale)"></textarea>
+    <textarea class="f-note" id="f-note" placeholder="Note iniziali (opzionale)"></textarea>
   </div>
   <div class="form-row">
     <button class="btn-add" onclick="addTask()">Aggiungi task</button>
@@ -128,27 +151,25 @@
 <div class="task-list" id="task-list"></div>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────
 const JSONBIN_API_KEY = '$2a$10$1UEV6gPLoRcJBr98CfUcq.yahi3jXsLE793md6CVrL5NAVZDbaMRW';
 const JSONBIN_BIN_ID  = '6a2bff73f5f4af5e29e63c4e';
-// ────────────────────────────────────────────────────
 
 const DEFAULT_TASKS = [
-  {id:1,  title:"Report 4Take — Settimana 24", note:"Inviare entro oggi. Condividere 2 documenti Excel con Nicola, definire prime obiettive.", scadenza:"Oggi", priority:"urgente", tags:["urgente","4take"], done:false},
-  {id:2,  title:"Riunione Keller con Piero", note:"Oggi dalle 14:00 alle 15:00. Integrazione ore per completare attività delle aziende.", scadenza:"Oggi 14:00-15:00", priority:"oggi", tags:["oggi","make"], done:false},
-  {id:3,  title:"Mail BLM — Presentazione test + link", note:"BLM ha acquistato pacchetto 4 test + consulenza. Preparare mail con link per effettuare il test.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","make"], done:false},
-  {id:4,  title:"Video promo Red Carpet", note:"Breve video promozionale per il gruppo musicale. Priorità alta.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","privato"], done:false},
-  {id:5,  title:"Verifica tessera ACI", note:"Verificare se la tessera è attiva e da quando.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","privato"], done:false},
-  {id:6,  title:"Verifica GSE per detrazione", note:"Pratica personale per detrazione fiscale.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","privato"], done:false},
-  {id:7,  title:"Verifica ultime PEC", note:"Verificare se le ultime PEC sono state prese al commercialista.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","make"], done:false},
-  {id:8,  title:"Sunto per assistenza iCareFone Transfer", note:"Riepilogo problema (migrazione WhatsApp Pixel→iPhone, backup sparito) da inviare all'assistenza.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","privato"], done:false},
-  {id:9,  title:"Corso Raffaele Gaito", note:"Pianificare le sessioni di studio per seguire il corso acquistato.", scadenza:"Prossime settimane", priority:"mese", tags:["mese","make"], done:false},
-  {id:10, title:"Proposta Summer Day Make Group", note:"Proporre attività di team building o simili per la giornata di fine luglio.", scadenza:"Fine luglio", priority:"mese", tags:["mese","make"], done:false},
-  {id:11, title:"Lettura libro (sera)", note:"Leggere il libro la sera. Obiettivo: finirlo entro 1 mese.", scadenza:"Entro 1 mese", priority:"mese", tags:["mese","privato"], done:false},
-  {id:12, title:"Esami del sangue — Risposta CeLab", note:"In attesa di risposta dal Centro CeLab a cui hai mandato la richiesta.", scadenza:"In attesa", priority:"personale", tags:["personale","privato"], done:false},
-  {id:13, title:"Mail a Marc (Make Finance) — Padova Investimenti / Patent Box", note:"Girare a Marc la relazione del consulente della software house per valutare l'applicabilità del Patent Box.", scadenza:"Lunedì 16 giugno", priority:"settimana", tags:["settimana","make"], done:false},
-  {id:14, title:"Invia documenti a ETRA — aumento componenti abitativi", note:"Girare i documenti richiesti a info@etraspa.it.", scadenza:"Sabato 14 giugno", priority:"settimana", tags:["settimana","privato"], done:false},
-  {id:15, title:"Fissa incontro con maestro Luca — tema Elia", note:"Contattare il maestro Luca per organizzare un incontro sul tema di Elia.", scadenza:"Entro venerdì 19 giugno", priority:"mese", tags:["mese","privato"], done:false},
+  {id:1,  title:"Report 4Take — Settimana 24", note:"Inviare entro oggi. Condividere 2 documenti Excel con Nicola, definire prime obiettive.", scadenza:"Oggi", priority:"urgente", tags:["urgente","4take"], done:false, log:[]},
+  {id:2,  title:"Riunione Keller con Piero", note:"Oggi dalle 14:00 alle 15:00. Integrazione ore per completare attività delle aziende.", scadenza:"Oggi 14:00-15:00", priority:"oggi", tags:["oggi","make"], done:false, log:[]},
+  {id:3,  title:"Mail BLM — Presentazione test + link", note:"BLM ha acquistato pacchetto 4 test + consulenza. Preparare mail con link per effettuare il test.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","make"], done:false, log:[]},
+  {id:4,  title:"Video promo Red Carpet", note:"Breve video promozionale per il gruppo musicale. Priorità alta.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","privato"], done:false, log:[]},
+  {id:5,  title:"Verifica tessera ACI", note:"Verificare se la tessera è attiva e da quando.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","privato"], done:false, log:[]},
+  {id:6,  title:"Verifica GSE per detrazione", note:"Pratica personale per detrazione fiscale.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","privato"], done:false, log:[]},
+  {id:7,  title:"Verifica ultime PEC", note:"Verificare se le ultime PEC sono state prese al commercialista.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","make"], done:false, log:[]},
+  {id:8,  title:"Sunto per assistenza iCareFone Transfer", note:"Riepilogo problema migrazione WhatsApp Pixel verso iPhone, backup sparito, da inviare all assistenza.", scadenza:"Questa settimana", priority:"settimana", tags:["settimana","privato"], done:false, log:[]},
+  {id:9,  title:"Corso Raffaele Gaito", note:"Pianificare le sessioni di studio per seguire il corso acquistato.", scadenza:"Prossime settimane", priority:"mese", tags:["mese","make"], done:false, log:[]},
+  {id:10, title:"Proposta Summer Day Make Group", note:"Proporre attività di team building o simili per la giornata di fine luglio.", scadenza:"Fine luglio", priority:"mese", tags:["mese","make"], done:false, log:[]},
+  {id:11, title:"Lettura libro (sera)", note:"Leggere il libro la sera. Obiettivo: finirlo entro 1 mese.", scadenza:"Entro 1 mese", priority:"mese", tags:["mese","privato"], done:false, log:[]},
+  {id:12, title:"Esami del sangue — Risposta CeLab", note:"In attesa di risposta dal Centro CeLab a cui hai mandato la richiesta.", scadenza:"In attesa", priority:"personale", tags:["personale","privato"], done:false, log:[]},
+  {id:13, title:"Mail a Marc (Make Finance) — Padova Investimenti / Patent Box", note:"Girare a Marc la relazione del consulente della software house per valutare l applicabilità del Patent Box.", scadenza:"Lunedì 16 giugno", priority:"settimana", tags:["settimana","make"], done:false, log:[]},
+  {id:14, title:"Invia documenti a ETRA — aumento componenti abitativi", note:"Girare i documenti richiesti a info@etraspa.it.", scadenza:"Sabato 14 giugno", priority:"settimana", tags:["settimana","privato"], done:false, log:[]},
+  {id:15, title:"Fissa incontro con maestro Luca — tema Elia", note:"Contattare il maestro Luca per organizzare un incontro sul tema di Elia.", scadenza:"Entro venerdì 19 giugno", priority:"mese", tags:["mese","privato"], done:false, log:[]},
 ];
 
 let tasks = [];
@@ -156,12 +177,11 @@ let nextId = 16;
 let currentFilter = 'tutti';
 let formOpen = false;
 let saveTimer = null;
+let openNotes = {};
 
 function setSyncStatus(status, msg) {
-  const dot = document.getElementById('sync-dot');
-  const lbl = document.getElementById('sync-label');
-  dot.className = 'sync-dot ' + status;
-  lbl.textContent = msg;
+  document.getElementById('sync-dot').className = 'sync-dot ' + status;
+  document.getElementById('sync-label').textContent = msg;
 }
 
 async function loadFromCloud() {
@@ -170,13 +190,18 @@ async function loadFromCloud() {
     const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
       headers: { 'X-Master-Key': JSONBIN_API_KEY }
     });
-    if (!res.ok) throw new Error('Fetch failed');
+    if (!res.ok) throw new Error();
     const data = await res.json();
-    tasks = data.record.tasks || DEFAULT_TASKS.map(t=>({...t}));
-    nextId = data.record.nextId || 16;
+    const record = data.record;
+    if (record.tasks && record.tasks.length > 0) {
+      tasks = record.tasks.map(t => ({ log: [], ...t }));
+      nextId = record.nextId || 16;
+    } else {
+      tasks = DEFAULT_TASKS.map(t => ({...t}));
+    }
     setSyncStatus('ok', 'Sincronizzato ' + new Date().toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'}));
   } catch(e) {
-    tasks = DEFAULT_TASKS.map(t=>({...t}));
+    tasks = DEFAULT_TASKS.map(t => ({...t}));
     setSyncStatus('error', 'Offline — modifiche non sincronizzate');
   }
   render();
@@ -190,16 +215,20 @@ async function saveToCloud() {
       headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
       body: JSON.stringify({ tasks, nextId })
     });
-    if (!res.ok) throw new Error('Save failed');
+    if (!res.ok) throw new Error();
     setSyncStatus('ok', 'Salvato ' + new Date().toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'}));
   } catch(e) {
-    setSyncStatus('error', 'Errore salvataggio — riprova');
+    setSyncStatus('error', 'Errore salvataggio');
   }
 }
 
 function debounceSave() {
   if (saveTimer) clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveToCloud, 800);
+  saveTimer = setTimeout(saveToCloud, 900);
+}
+
+function nowLabel() {
+  return new Date().toLocaleDateString('it-IT', {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
 }
 
 function toggleForm() {
@@ -216,7 +245,7 @@ function addTask() {
   const area = document.getElementById('f-area').value;
   const scadenza = document.getElementById('f-scadenza').value.trim() || '—';
   const note = document.getElementById('f-note').value.trim();
-  tasks.push({id:nextId++, title, note, scadenza, priority, tags:[priority, area], done:false});
+  tasks.push({ id:nextId++, title, note, scadenza, priority, tags:[priority, area], done:false, log:[] });
   document.getElementById('f-title').value='';
   document.getElementById('f-scadenza').value='';
   document.getElementById('f-note').value='';
@@ -227,13 +256,56 @@ function addTask() {
 
 function toggleDone(id) {
   const t = tasks.find(t=>t.id===id);
-  if(t){ t.done=!t.done; render(); debounceSave(); }
+  if (!t) return;
+  t.done = !t.done;
+  if (!t.log) t.log = [];
+  t.log.unshift({ ts: nowLabel(), text: t.done ? '✅ Completato' : '🔄 Riaperto' });
+  render();
+  debounceSave();
 }
 
 function deleteTask(id) {
-  if(!confirm('Eliminare questo task?')) return;
+  if (!confirm('Eliminare questo task?')) return;
   tasks = tasks.filter(t=>t.id!==id);
-  render(); debounceSave();
+  delete openNotes[id];
+  render();
+  debounceSave();
+}
+
+function toggleNote(id) {
+  openNotes[id] = !openNotes[id];
+  const panel = document.getElementById('note-panel-' + id);
+  if (panel) panel.className = 'note-panel' + (openNotes[id] ? ' open' : '');
+  const btn = document.getElementById('note-btn-' + id);
+  if (btn) btn.textContent = openNotes[id] ? '▲ Chiudi note' : '📝 Note e avanzamento';
+}
+
+function saveNote(id) {
+  const t = tasks.find(t=>t.id===id);
+  if (!t) return;
+  const ta = document.getElementById('note-ta-' + id);
+  const newNote = ta ? ta.value.trim() : '';
+  if (!t.log) t.log = [];
+  if (newNote !== t.note) {
+    t.log.unshift({ ts: nowLabel(), text: '📝 Note aggiornate' });
+    t.note = newNote;
+  }
+  const savedMsg = document.getElementById('note-saved-' + id);
+  if (savedMsg) { savedMsg.style.display='inline'; setTimeout(()=>savedMsg.style.display='none', 2000); }
+  debounceSave();
+}
+
+function addLogEntry(id) {
+  const t = tasks.find(t=>t.id===id);
+  if (!t) return;
+  const input = document.getElementById('log-input-' + id);
+  const text = input ? input.value.trim() : '';
+  if (!text) return;
+  if (!t.log) t.log = [];
+  t.log.unshift({ ts: nowLabel(), text });
+  input.value = '';
+  render();
+  debounceSave();
 }
 
 function setFilter(f, btn) {
@@ -257,13 +329,19 @@ function render() {
     if(a.done!==b.done) return a.done?1:-1;
     return PRIORITY_ORDER.indexOf(a.priority)-PRIORITY_ORDER.indexOf(b.priority);
   });
+
   document.getElementById('cnt-total').textContent = tasks.length;
   document.getElementById('cnt-open').textContent = tasks.filter(t=>!t.done).length;
   document.getElementById('cnt-done').textContent = tasks.filter(t=>t.done).length;
   document.getElementById('cnt-urgente').textContent = tasks.filter(t=>!t.done&&(t.priority==='urgente'||t.priority==='oggi')).length;
+
   const list = document.getElementById('task-list');
-  if(!filtered.length){ list.innerHTML='<div class="empty">Nessun task in questa categoria.</div>'; return; }
-  list.innerHTML = filtered.map(t=>`
+  if (!filtered.length) { list.innerHTML='<div class="empty">Nessun task in questa categoria.</div>'; return; }
+
+  list.innerHTML = filtered.map(t => {
+    const isOpen = openNotes[t.id] || false;
+    const log = t.log || [];
+    return `
     <div class="task-card ${t.priority} ${t.done?'done-card':''}">
       <div class="checkbox ${t.done?'checked':''}" onclick="toggleDone(${t.id})">${t.done?'✓':''}</div>
       <div class="task-body">
@@ -272,10 +350,37 @@ function render() {
           ${t.tags.map(tag=>`<span class="tag tag-${tag}">${TAG_LABELS[tag]||tag}</span>`).join('')}
           <span class="date-lbl">📅 ${t.scadenza}</span>
         </div>
-        ${t.note?`<div class="task-note">${t.note}</div>`:''}
+
+        <div class="note-section">
+          <button class="note-toggle" id="note-btn-${t.id}" onclick="toggleNote(${t.id})">
+            ${isOpen ? '▲ Chiudi note' : '📝 Note e avanzamento'}
+          </button>
+          <div class="note-panel ${isOpen?'open':''}" id="note-panel-${t.id}">
+            <textarea class="note-textarea" id="note-ta-${t.id}" placeholder="Aggiungi note, dettagli o aggiornamenti...">${t.note||''}</textarea>
+            <div class="note-actions">
+              <button class="btn-save-note" onclick="saveNote(${t.id})">💾 Salva note</button>
+              <span class="note-saved" id="note-saved-${t.id}">✓ Salvato</span>
+            </div>
+
+            <div style="margin-top:10px">
+              <div style="display:flex;gap:6px;margin-bottom:8px">
+                <input type="text" id="log-input-${t.id}" placeholder="Aggiungi aggiornamento avanzamento..." style="flex:1;border:1px solid #e2e8f0;border-radius:6px;padding:5px 9px;font-size:0.76rem;font-family:Arial,sans-serif;background:#fafafa;color:#333;">
+                <button onclick="addLogEntry(${t.id})" style="background:#e2e8f0;border:none;border-radius:6px;padding:5px 10px;font-size:0.76rem;cursor:pointer;color:#4a5568;font-weight:600;">+ Log</button>
+              </div>
+              ${log.length > 0 ? `
+                <div class="log-section">
+                  <div class="log-title">Storico</div>
+                  ${log.slice(0,8).map(l=>`
+                    <div class="log-entry">${l.text} <span class="log-date">— ${l.ts}</span></div>
+                  `).join('')}
+                </div>` : ''}
+            </div>
+          </div>
+        </div>
       </div>
       <button class="del-btn" onclick="deleteTask(${t.id})" title="Elimina">✕</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 const now = new Date();
